@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model User {
+  id                Int                   @id @default(autoincrement())
+  cognitoSub        String                @db.Text @map(name: "cognito_sub") @unique
+  email             String                @db.Text
+  image             String?               @db.Text
+  mobile            String?               @db.VarChar(100)
+  firstName         String?               @map(name: "first_name") @db.VarChar(100)
+  lastName          String?               @map(name: "last_name") @db.VarChar(100)
+  userLocation      String?               @db.Text @map(name: "user_location")
+  latitude          Float?
+  longitude         Float?
+  country           String?  
+  status            UserStates            @default(pending)
+  userRole          UserRoles             @default(user) @map(name: "user_role")
+  isDeleted         Boolean               @default(false) @map(name: "is_deleted")
+  isDeactivated     Boolean               @default(false) @map(name: "is_deactivated")
+  signupStatus      SignupStatus          @default(pending) @map(name: "signup_status")
+  userPoint         Float?                @map(name: "user_point")
+  hostedProducts    Product[]             @relation("productHasHostedUser")
+  consumeProducts   Product[]             @relation("productHasConsumer")
+  productRequest    ProductRequest[]      @relation("productRequestHasUser")
+  givenFeedBack     FeedBack[]            @relation("givenFeedbackHasUser")
+  reciveFeedBack    FeedBack[]            @relation("reciveFeedbackHasUser")
+  productWishList   ProductWishList[]     @relation("productWishListHasUser")
+  // user able to login with multiple device
+  firebaseMzgTokens String[]              @db.Text @map(name: "firebase_mzg_token")
+
+  createdAt         DateTime              @default(now()) @map(name: "created_at")
+  updatedAt         DateTime              @default(now()) @map(name: "updated_at")
+  @@map(name: "users")
+}
+
+model Product {
+  id                  Int               @id @default(autoincrement())
+  hostedAt            DateTime          @default(now()) @map(name: "hosted_at")
+  createdAt           DateTime          @default(now()) @map(name: "created_at")
+  updatedAt           DateTime          @default(now()) @map(name: "updated_at")
+  
+  @@map(name: "product")
+}
+
+model Category {
+  id                Int               @id @default(autoincrement())
+  createdAt         DateTime          @default(now()) @map(name: "created_at")
+  updatedAt         DateTime          @default(now()) @map(name: "updated_at")
+  
+  @@map(name: "category")
+}
+
+model ProductTag {
+  id                Int               @id @default(autoincrement())
+  createdAt         DateTime          @default(now()) @map(name: "created_at")
+  updatedAt         DateTime          @default(now()) @map(name: "updated_at")
+  
+  @@map(name: "productTag")
+}
+
+model ProductRequest {
+  id                Int                   @id @default(autoincrement())
+  createdAt         DateTime              @default(now()) @map(name: "created_at")
+  updatedAt         DateTime              @default(now()) @map(name: "updated_at")
+  
+  @@map(name: "productRequest")
+}
+
+model ProductWishList {
+  id                Int               @id @default(autoincrement())
+  createdAt         DateTime          @default(now()) @map(name: "created_at")
+  updatedAt         DateTime          @default(now()) @map(name: "updated_at")
+  
+  @@map(name: "productWishList")
+}
+
+model FeedBack {
+  id                  Int              @id @default(autoincrement())
+  createdAt           DateTime         @default(now()) @map(name: "created_at")
+  updatedAt           DateTime         @default(now()) @map(name: "updated_at")
+  
+  @@map(name: "feedback")
+}
+
+model Chat {
+  id                  Int               @id @default(autoincrement())
+  createdAt           DateTime          @default(now()) @map(name: "created_at")
+  updatedAt           DateTime          @default(now()) @map(name: "updated_at")
+
+  @@map(name: "organizationChat")
+}
+
+enum UserStates {
+  pending
+  approved
+  reject
+  block
+}
+
+enum SignupStatus {
+  pending
+  two_factor_verify
+  compleated
+}
+
+enum UserRoles {
+  admin
+  user
+}
